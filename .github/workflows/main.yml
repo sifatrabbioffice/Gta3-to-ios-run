@@ -28,18 +28,19 @@ jobs:
           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           xcodebuild -version
 
-        # ৪. সিমেক (CMake) দিয়ে iOS (ARM64) এর জন্য প্রজেক্ট কনফিগার করা
+        # ৪. সিমেক (CMake) দিয়ে iOS (ARM64) এর জন্য প্রজেক্ট কনফিগার করা (খাঁচা ভাঙার চূড়ান্ত ট্রিক)
       - name: Configure CMake for iOS Build
         run: |
           mkdir build && cd build
           cmake .. \
             -G Xcode \
-            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_XCODE_EFFECTIVE_PLATFORMS="-iphoneos" \
             -DCMAKE_OSX_SYSROOT=iphoneos \
             -DCMAKE_OSX_ARCHITECTURES="arm64" \
             -DENABLE_TESTS=OFF \
             -DCMAKE_PREFIX_PATH="/opt/homebrew;/usr/local" \
             -DBoost_NO_WARN_NEW_VERSIONS=ON
+
 
 
       # ৫. Xcodebuild কমান্ড দিয়ে কোড কম্পাইল করা
