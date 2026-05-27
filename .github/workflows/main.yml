@@ -15,10 +15,11 @@ jobs:
           repository: 'rwengine/openrw'
           fetch-depth: 1
 
-            # ২. ম্যাক ওএস রানারে প্রয়োজনীয় ডিপেন্ডেন্সি সেটআপ করা
+                 # ২. ম্যাক ওএস রানারে প্রয়োজনীয় ডিপেন্ডেন্সি সেটআপ করা (Boost যুক্ত করা হয়েছে)
       - name: Install Dependencies via Homebrew
         run: |
-          brew install cmake sdl2 libsndfile openal-soft
+          brew install cmake sdl2 libsndfile openal-soft boost
+
 
           
       # ৩. এক্সকোড (Xcode) এনভায়রনমেন্ট নিশ্চিত করা
