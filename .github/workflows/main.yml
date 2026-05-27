@@ -1,0 +1,73 @@
+name: Build OpenRW for iOS
+
+on:
+  workflow_dispatch: # এটি দিলে গিটহাব ড্যাশবোর্ড থেকে ম্যানুয়ালি রান করা যাবে
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      # ১. OpenRW সোর্স কোডটি ক্লোন/ডাউনলোড করা
+      - name: Checkout OpenRW Source Code
+        uses: actions/checkout@v4
+        with:
+          repository: 'rwengine/openrw'
+          fetch-depth: 1
+
+      # ২. ম্যাক ওএস রানারে প্রয়োজনীয় ডিপেন্ডেন্সি সেটআপ করা
+      - name: Install Dependencies via Homebrew
+        run: |
+          brew install cmake sdl2 libsndfile libopenal
+          
+      # ৩. এক্সকোড (Xcode) এনভায়রনমেন্ট নিশ্চিত করা
+      - name: Setup Xcode Environment
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+
+      # ৪. সিমেক (CMake) দিয়ে iOS (ARM64) এর জন্য প্রজেক্ট কনফিগার করা
+      - name: Configure CMake for iOS Build
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES="arm64" \
+            -DENABLE_TESTS=OFF
+
+      # ৫. Xcodebuild কমান্ড দিয়ে কোড কম্পাইল করা
+      - name: Build Code with Xcodebuild
+        run: |
+          cd build
+          xcodebuild -configuration Release -sdk iphoneos
+
+      # ৬. আইপিএ (IPA) ফাইল এবং জিপ (ZIP) ফাইল তৈরি করা
+      - name: Package IPA and ZIP Artifacts
+        run: |
+          # IPA এর জন্য স্ট্যান্ডার্ড পে-লোড ডিরেক্টরি তৈরি
+          mkdir -p Payload
+          
+          # তৈরি হওয়া .app ফাইলটি খুঁজে পে-লোডে নেওয়া (CMake আউটপুট অনুযায়ী)
+          find build -name "*.app" -exec cp -r {} Payload/ \; || true
+          
+          # ১টি আলাদা IPA ফাইল তৈরি করা
+          zip -r OpenRW.ipa Payload
+          
+          # সম্পূর্ণ বিল্ড ডিরেক্টরি এবং আর্টফ্যাক্টস আলাদা জিপ (ZIP) ফাইলে রূপান্তর করা
+          zip -r openrw-ios-build.zip build/ Payload
+
+      # ৭. আলাদাভাবে .ipa ফাইল আপলোড করা
+      - name: Upload Separate IPA File
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenRW-iOS-IPA
+          path: OpenRW.ipa
+
+      # ৮. পুরো বিল্ডের জিপ (ZIP) ফাইলটি আলাদা আপলোড করা
+      - name: Upload Entire Build ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenRW-iOS-Full-ZIP
+          path: openrw-ios-build.zip
