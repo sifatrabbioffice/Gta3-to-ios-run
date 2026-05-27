@@ -28,7 +28,7 @@ jobs:
           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           xcodebuild -version
 
-            # ৪. সিমেক (CMake) দিয়ে iOS (ARM64) এর জন্য প্রজেক্ট কনফিগার করা
+        # ৪. সিমেক (CMake) দিয়ে iOS (ARM64) এর জন্য প্রজেক্ট কনফিগার করা
       - name: Configure CMake for iOS Build
         run: |
           mkdir build && cd build
